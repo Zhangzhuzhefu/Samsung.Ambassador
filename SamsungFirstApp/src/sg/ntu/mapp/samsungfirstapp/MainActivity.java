@@ -65,7 +65,7 @@ public class MainActivity extends Activity {
 				Intent i = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 				startActivityForResult(i, RESULT_LOAD_IMAGE);
 			} else {
-				Toast.makeText(mContext, "Maximum reached",
+				Toast.makeText(mContext, "Maximum reached, please clear all",
 						Toast.LENGTH_SHORT).show();
 			}
 		}
