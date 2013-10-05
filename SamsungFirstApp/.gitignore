@@ -12,7 +12,7 @@ target
 release.properties
 pom.xml.*
 
-#Ant
+#Ant 
 #build.xml
 local.properties
 proguard.cfg
