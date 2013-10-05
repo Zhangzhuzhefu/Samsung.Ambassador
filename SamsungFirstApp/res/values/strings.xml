@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">SamsungFirstApp</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="byebye">Bye Bye!</string>
+    <string name="sample_app">Image Editor</string>
+    <string name="load_url">Loaded from url</string>
+    <string name="load_image">Loaded from local Gallery</string>
+    <string name="sample_app">Image Editor</string>
+    <string name="url0">http://images.wikia.com/doraemon/en/images/4/41/Joy.png</string>
+    <string name="url1">http://a3.twimg.com/profile_images/670625317/aam-logo-v3-twitter.png</string>
+    <string name="url2">http://cdn.crackberry.com/sites/crackberry.com/files/styles/large/public/topic_images/2013/ANDROID.png?itok=xhm7jaxS</string>
+    
+
+</resources>
