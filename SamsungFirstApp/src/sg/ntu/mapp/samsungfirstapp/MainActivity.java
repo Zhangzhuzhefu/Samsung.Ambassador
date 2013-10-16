@@ -29,6 +29,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -38,8 +41,8 @@ public class MainActivity extends Activity {
 	protected static final int RESULT_EDIT_IMAGE = 131892;
 	private Context mContext;
 	private String[] urls = new String[3];
-	//private Button button_add;
-	private ImageView[] imageViews = new ImageView[9];
+	private GridView gridView;
+	//private ImageView[] imageViews = new ImageView[9];
 	private int spotPostion;
 	private Bitmap[] bitmapImages = new Bitmap[9];
 	private ProgressDialog pd;
@@ -57,8 +60,9 @@ public class MainActivity extends Activity {
 				String picturePath = cursor.getString(columnIndex);
 				cursor.close();
 				bitmapImages[spotPostion] = BitmapFactory.decodeFile(picturePath);
-				imageViews[spotPostion].setImageBitmap(bitmapImages[spotPostion]);
-				imageViews[spotPostion].setBackgroundDrawable(null);
+				ViewGroup gridChild = (ViewGroup) gridView.getChildAt(spotPostion);
+				((ImageView) gridChild.findViewById(R.id.edit_photo)).setImageBitmap(bitmapImages[spotPostion]);
+				((ImageView) gridChild.findViewById(R.id.edit_photo)).setBackgroundDrawable(null);
 				spotPostion++;
 			} else if (requestCode == RESULT_EDIT_IMAGE && resultCode == RESULT_OK){
 				if (data!= null) {
@@ -68,8 +72,9 @@ public class MainActivity extends Activity {
 							Toast.LENGTH_SHORT).show();
 
 					bitmapImages[imgDataID] = BitmapFactory.decodeByteArray(imgData, 0, imgData.length);
-					imageViews[imgDataID].setImageBitmap(bitmapImages[imgDataID]);
-					imageViews[imgDataID].setBackgroundDrawable(null);
+					ViewGroup gridChild = (ViewGroup) gridView.getChildAt(imgDataID);
+					((ImageView) gridChild.findViewById(R.id.edit_photo)).setImageBitmap(bitmapImages[imgDataID]);
+					((ImageView) gridChild.findViewById(R.id.edit_photo)).setBackgroundDrawable(null);
 					Toast.makeText(mContext, "update",
 							Toast.LENGTH_SHORT).show();
 					//}
@@ -78,20 +83,6 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	/*OnClickListener fetchFromCameraListener = new OnClickListener() {
-		@Override
-		public void onClick(View v) {
-			if (spotPostion<9){
-				// find the first empty position and load picture from gallery
-				Intent i = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-				startActivityForResult(i, RESULT_LOAD_IMAGE);
-			} else {
-				Toast.makeText(mContext, "Maximum reached, please clear all.",
-						Toast.LENGTH_SHORT).show();
-			}
-		}
-	};
-	 */
 	OnClickListener editPhotoListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -126,27 +117,30 @@ public class MainActivity extends Activity {
 		urls[1]=mContext.getResources().getString(R.string.url1);
 		urls[2]=mContext.getResources().getString(R.string.url2);
 
-		//button_add = (Button) findViewById(R.id.button_add);
-		//button_add.setOnClickListener(fetchFromCameraListener);
-
-		imageViews[0] = (ImageView) findViewById(R.id.btn_add_photo1);
-		imageViews[1] = (ImageView) findViewById(R.id.btn_add_photo2);
-		imageViews[2] = (ImageView) findViewById(R.id.btn_add_photo3);
-		imageViews[3] = (ImageView) findViewById(R.id.btn_add_photo4);
-		imageViews[4] = (ImageView) findViewById(R.id.btn_add_photo5);
-		imageViews[5] = (ImageView) findViewById(R.id.btn_add_photo6);
-		imageViews[6] = (ImageView) findViewById(R.id.btn_add_photo7);
-		imageViews[7] = (ImageView) findViewById(R.id.btn_add_photo8);
-		imageViews[8] = (ImageView) findViewById(R.id.btn_add_photo9);
-		for (int i=0;i<9;i++){
-			imageViews[i].setTag(i);
-			imageViews[i].setOnClickListener(editPhotoListener);
-		}
-
+		gridView = (GridView) findViewById(R.id.gridView);
+		
+		ImageAdapter adapter = new ImageAdapter(this, bitmapImages);
+		gridView.setAdapter(adapter);
+		gridView.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+				Intent in = new Intent(mContext, EditImageActivity.class);
+				Bitmap b;
+				b = bitmapImages[position];
+				if (b!=null){
+					ByteArrayOutputStream bs = new ByteArrayOutputStream();
+					b.compress(Bitmap.CompressFormat.PNG, 50, bs);
+					in.putExtra("imageData", bs.toByteArray());
+					in.putExtra("imageDataID", position);
+					startActivityForResult(in, RESULT_EDIT_IMAGE);
+				} else {
+					Log.d(this.toString(), "b is null");
+					Toast.makeText(mContext, "No image here.", Toast.LENGTH_SHORT).show();
+			}
+		}});
+		
 		new TheTask().execute();
-
-
 	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -209,10 +203,10 @@ public class MainActivity extends Activity {
 			pd.dismiss();
 			if(bitmapImages!=null)
 			{
-
 				for (int i=0;i<3;i++){
-					imageViews[i].setImageBitmap(bitmapImages[i]);
-					imageViews[i].setBackgroundDrawable(null);
+					ViewGroup gridChild = (ViewGroup) gridView.getChildAt(i);
+					((ImageView) gridChild.findViewById(R.id.edit_photo)).setImageBitmap(bitmapImages[i]);
+					((ImageView) gridChild.findViewById(R.id.edit_photo)).setBackgroundDrawable(null);
 					spotPostion++;
 
 				}
@@ -283,8 +277,9 @@ public class MainActivity extends Activity {
 			public void onClick(DialogInterface dialog,int id) {
 				// if this button is clicked, clear all the images loaded from camera
 				for (int i=3;i<spotPostion;i++) {
-					imageViews[i].setBackgroundDrawable(getResources().getDrawable(R.drawable.defaul_image));
-					imageViews[i].setImageBitmap(null);
+					ViewGroup gridChild = (ViewGroup) gridView.getChildAt(i);
+					((ImageView) gridChild.findViewById(R.id.edit_photo)).setBackgroundDrawable(getResources().getDrawable(R.drawable.defaul_image));
+					((ImageView) gridChild.findViewById(R.id.edit_photo)).setImageBitmap(null);
 				}
 				spotPostion = 3;
 			}

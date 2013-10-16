@@ -10,36 +10,6 @@
     tools:context=".MainActivity" >
 
     <!--
-    <RelativeLayout
-        android:id="@+id/topBanner"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="0dp"
-        android:layout_marginBottom="0dp"
-        android:orientation="horizontal" >
-        
-        <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:text="@string/sample_app"
-        android:typeface="sans"
-        android:textSize="30sp" />
-        
-        <Button
-            android:id="@+id/button_add"
-            android:layout_width="60dp"
-            android:layout_height="40dp"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:scaleType="centerInside"
-            android:clickable="true"
-            android:background="@drawable/button_add"/>
-         
-    </RelativeLayout>
-    -->
-
     <LinearLayout
         android:id="@+id/greidLayout"
         android:layout_width="match_parent"
@@ -165,6 +135,16 @@
                 android:textSize="30sp" />
         </LinearLayout>
     </LinearLayout>
+    -->
+
+    <GridView
+        android:id="@+id/gridView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:numColumns="3"
+        android:stretchMode="columnWidth" >
+    </GridView>
 
     <Button
         android:id="@+id/button_clear"
