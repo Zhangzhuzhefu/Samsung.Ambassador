@@ -1,6 +1,13 @@
 package sg.ntu.mapp.samsungfirstapp;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -13,6 +20,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -34,14 +42,12 @@ import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 
 @SuppressLint({ "NewApi" }) 
 public class MainActivity extends Activity { 
+	static public int spotPostion;
 	protected static final int RESULT_LOAD_IMAGE = 131891;
 	protected static final int RESULT_EDIT_IMAGE = 131892;
-	protected ImageLoader imageLoader;
 	private Context mContext;
-	private String[] urls = new String[3];
+
 	private GridView gridView;
-	//private ImageView[] imageViews = new ImageView[9];
-	private int spotPostion;
 	private Bitmap[] bitmapImages = new Bitmap[9];
 	private ProgressDialog pd;
 
@@ -73,9 +79,7 @@ public class MainActivity extends Activity {
 					ViewGroup gridChild = (ViewGroup) gridView.getChildAt(imgDataID);
 					((ImageView) gridChild.findViewById(R.id.edit_photo)).setImageBitmap(bitmapImages[imgDataID]);
 					((ImageView) gridChild.findViewById(R.id.edit_photo)).setBackgroundDrawable(null);
-					Toast.makeText(mContext, "update",
-							Toast.LENGTH_SHORT).show();
-					//}
+					Toast.makeText(mContext, "update",Toast.LENGTH_SHORT).show();
 				}
 			}
 		}
@@ -110,13 +114,9 @@ public class MainActivity extends Activity {
 		pd = new ProgressDialog(this);
 
 		setContentView(R.layout.activity_main);
-
-		urls[0]=mContext.getResources().getString(R.string.url0);
-		urls[1]=mContext.getResources().getString(R.string.url1);
-		urls[2]=mContext.getResources().getString(R.string.url2);
-
-		gridView = (GridView) findViewById(R.id.gridView);
 		
+		gridView = (GridView) findViewById(R.id.gridView);
+
 		ImageAdapter adapter = new ImageAdapter(this, bitmapImages);
 		gridView.setAdapter(adapter);
 		gridView.setOnItemClickListener(new OnItemClickListener() {
@@ -133,71 +133,14 @@ public class MainActivity extends Activity {
 				} else {
 					Log.d(this.toString(), "b is null");
 					Toast.makeText(mContext, "No image here.", Toast.LENGTH_SHORT).show();
-			}
-		}});
-		
-		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext()).build();
-		DisplayImageOptions options = new DisplayImageOptions.Builder().delayBeforeLoading(1000).build();
-		ImageLoader.getInstance().init(config);
-		imageLoader = ImageLoader.getInstance();
-		
-		//Method 1
-		//new TheTask().execute();
-		
-		//Method 2
-		pd.setMessage("Loading..");
-		pd.show();
-		imageLoader.loadImage(urls[0], new SimpleImageLoadingListener() {
-			@Override
-			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-				// Do whatever you want with Bitmap
-				if(bitmapImages!=null)
-				{
-					bitmapImages[0]=loadedImage;
-					ViewGroup gridChild = (ViewGroup) gridView.getChildAt(0);
-					((ImageView) gridChild.findViewById(R.id.edit_photo)).setImageBitmap(bitmapImages[0]);
-					((ImageView) gridChild.findViewById(R.id.edit_photo)).setBackgroundDrawable(null);
-					spotPostion++;
 				}
-			}
-		});
-		imageLoader.loadImage(urls[1], new SimpleImageLoadingListener() {
-			@Override
-			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-				// Do whatever you want with Bitmap
-				
-				if(bitmapImages!=null)
-				{
-					bitmapImages[1]=loadedImage;
-					ViewGroup gridChild = (ViewGroup) gridView.getChildAt(1);
-					((ImageView) gridChild.findViewById(R.id.edit_photo)).setImageBitmap(bitmapImages[1]);
-					((ImageView) gridChild.findViewById(R.id.edit_photo)).setBackgroundDrawable(null);
-					spotPostion++;
-				}
-			}
-		});
-		imageLoader.loadImage(urls[2], new SimpleImageLoadingListener() {
-			@Override
-			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-				// Do whatever you want with Bitmap
-				pd.dismiss();
-				if(bitmapImages!=null)
-				{
-					bitmapImages[2]=loadedImage;
-					ViewGroup gridChild = (ViewGroup) gridView.getChildAt(2);
-					((ImageView) gridChild.findViewById(R.id.edit_photo)).setImageBitmap(bitmapImages[2]);
-					((ImageView) gridChild.findViewById(R.id.edit_photo)).setBackgroundDrawable(null);
-					spotPostion++;
-				}
-			}
-		});
-		}
-	
+			}});
+		spotPostion=3;
+	}
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-
 		getMenuInflater().inflate(R.menu.main, menu);
-
 		return true;
 	}
 
@@ -221,102 +164,6 @@ public class MainActivity extends Activity {
 		super.onResume();
 	}
 
-/*
-	class TheTask extends AsyncTask<Void,Void,Void>
-	{
-
-		@Override
-		protected void onPreExecute() {
-			// TODO Auto-generated method stub
-			super.onPreExecute();
-			pd.setMessage("Loading..");
-			pd.show();
-		}
-
-		@Override
-		protected Void doInBackground(Void... params) {
-			// TODO Auto-generated method stub
-			try
-			{
-				for (int i=0;i<3;i++)
-					bitmapImages[i] = downloadBitmap(urls[i]);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			// TODO Auto-generated method stub
-			super.onPostExecute(result);
-			pd.dismiss();
-			if(bitmapImages!=null)
-			{
-				for (int i=0;i<3;i++){
-					ViewGroup gridChild = (ViewGroup) gridView.getChildAt(i);
-					((ImageView) gridChild.findViewById(R.id.edit_photo)).setImageBitmap(bitmapImages[i]);
-					((ImageView) gridChild.findViewById(R.id.edit_photo)).setBackgroundDrawable(null);
-					spotPostion++;
-
-				}
-			}
-
-		}   
-	}
-	
-	private Bitmap downloadBitmap(String url) {
-		Bitmap bitmapImage = null;
-		// initilize the default HTTP client object
-		final DefaultHttpClient client = new DefaultHttpClient();
-
-		//forming a HttoGet request 
-		final HttpGet getRequest = new HttpGet(url);
-		try {
-
-			HttpResponse response = client.execute(getRequest);
-
-			//check 200 OK for success
-			final int statusCode = response.getStatusLine().getStatusCode();
-
-			if (statusCode != HttpStatus.SC_OK) {
-				Log.w("ImageDownloader", "Error " + statusCode + 
-						" while retrieving bitmap from " + url);
-				return null;
-
-			}
-
-			final HttpEntity entity = response.getEntity();
-			if (entity != null) {
-				InputStream inputStream = null;
-				try {
-					// getting contents from the stream 
-					inputStream = entity.getContent();
-
-					// decoding stream data back into image Bitmap that android understands
-					bitmapImage = BitmapFactory.decodeStream(inputStream);
-
-
-				} finally {
-					if (inputStream != null) {
-						inputStream.close();
-					}
-					entity.consumeContent();
-				}
-			}
-		} catch (Exception e) {
-			// You Could provide a more explicit error message for IOException
-			getRequest.abort();
-			Log.e("ImageDownloader", "Something went wrong while" +
-					" retrieving bitmap from " + url + e.toString());
-		} 
-
-		return bitmapImage;
-	}
-*/
-	
 	public void clearAll(View v){
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
 
@@ -351,5 +198,4 @@ public class MainActivity extends Activity {
 		// show it
 		alertDialog.show();
 	}
-
 }

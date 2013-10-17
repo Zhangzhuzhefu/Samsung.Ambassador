@@ -141,9 +141,11 @@
         android:id="@+id/gridView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@+id/button_clear"
         android:gravity="center"
         android:numColumns="3"
         android:stretchMode="columnWidth" >
+
     </GridView>
 
     <Button

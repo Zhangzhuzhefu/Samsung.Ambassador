@@ -2,20 +2,33 @@ package sg.ntu.mapp.samsungfirstapp;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.TextView;
+
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
  
 public class ImageAdapter extends BaseAdapter {
 	private Context context;
 	private final Bitmap[] imgs;
+	protected ImageLoader imageLoader;
+	private String[] urls = new String[3];
  
 	public ImageAdapter(Context context, Bitmap[] imgs) {
 		this.context = context;
 		this.imgs = imgs;
+		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context).build();
+		//DisplayImageOptions options = new DisplayImageOptions.Builder().delayBeforeLoading(1000).build();
+		ImageLoader.getInstance().init(config);
+		imageLoader = ImageLoader.getInstance();
+		
+		urls[0]=context.getResources().getString(R.string.url0);
+		urls[1]=context.getResources().getString(R.string.url1);
+		urls[2]=context.getResources().getString(R.string.url2);
 	}
  
 	public View getView(int position, View convertView, ViewGroup parent) {
@@ -35,6 +48,10 @@ public class ImageAdapter extends BaseAdapter {
 			// set image
 			ImageView imageView = (ImageView) gridView.findViewById(R.id.edit_photo);
 			imageView.setImageBitmap(imgs[position]);
+			if (position<3){
+				imageLoader.displayImage(urls[position], imageView);
+				imageView.setBackgroundDrawable(null);
+			}
  
 		} else {
 			gridView = (View) convertView;
