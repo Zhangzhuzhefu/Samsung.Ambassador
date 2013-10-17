@@ -42,14 +42,12 @@ import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 
 @SuppressLint({ "NewApi" }) 
 public class MainActivity extends Activity { 
-	static public int spotPostion;
+	protected static int spotPostion;
 	protected static final int RESULT_LOAD_IMAGE = 131891;
 	protected static final int RESULT_EDIT_IMAGE = 131892;
 	private Context mContext;
-
 	private GridView gridView;
 	private Bitmap[] bitmapImages = new Bitmap[9];
-	private ProgressDialog pd;
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -74,7 +72,6 @@ public class MainActivity extends Activity {
 					int imgDataID = data.getIntExtra("imageDataID", 0);
 					Toast.makeText(mContext, String.valueOf(imgDataID),
 							Toast.LENGTH_SHORT).show();
-
 					bitmapImages[imgDataID] = BitmapFactory.decodeByteArray(imgData, 0, imgData.length);
 					ViewGroup gridChild = (ViewGroup) gridView.getChildAt(imgDataID);
 					((ImageView) gridChild.findViewById(R.id.edit_photo)).setImageBitmap(bitmapImages[imgDataID]);
@@ -111,12 +108,10 @@ public class MainActivity extends Activity {
 
 		mContext = this;
 		spotPostion = 0;
-		pd = new ProgressDialog(this);
-
+		
 		setContentView(R.layout.activity_main);
 		
 		gridView = (GridView) findViewById(R.id.gridView);
-
 		ImageAdapter adapter = new ImageAdapter(this, bitmapImages);
 		gridView.setAdapter(adapter);
 		gridView.setOnItemClickListener(new OnItemClickListener() {

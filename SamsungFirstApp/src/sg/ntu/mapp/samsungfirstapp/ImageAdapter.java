@@ -22,7 +22,6 @@ public class ImageAdapter extends BaseAdapter {
 		this.context = context;
 		this.imgs = imgs;
 		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context).build();
-		//DisplayImageOptions options = new DisplayImageOptions.Builder().delayBeforeLoading(1000).build();
 		ImageLoader.getInstance().init(config);
 		imageLoader = ImageLoader.getInstance();
 		
