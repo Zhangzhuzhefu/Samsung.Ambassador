@@ -1,13 +1,6 @@
 package sg.ntu.mapp.samsungfirstapp;
 
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -20,7 +13,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -35,10 +27,16 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
+
 @SuppressLint({ "NewApi" }) 
 public class MainActivity extends Activity { 
 	protected static final int RESULT_LOAD_IMAGE = 131891;
 	protected static final int RESULT_EDIT_IMAGE = 131892;
+	protected ImageLoader imageLoader;
 	private Context mContext;
 	private String[] urls = new String[3];
 	private GridView gridView;
@@ -138,8 +136,62 @@ public class MainActivity extends Activity {
 			}
 		}});
 		
-		new TheTask().execute();
-	}
+		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext()).build();
+		DisplayImageOptions options = new DisplayImageOptions.Builder().delayBeforeLoading(1000).build();
+		ImageLoader.getInstance().init(config);
+		imageLoader = ImageLoader.getInstance();
+		
+		//Method 1
+		//new TheTask().execute();
+		
+		//Method 2
+		pd.setMessage("Loading..");
+		pd.show();
+		imageLoader.loadImage(urls[0], new SimpleImageLoadingListener() {
+			@Override
+			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+				// Do whatever you want with Bitmap
+				if(bitmapImages!=null)
+				{
+					bitmapImages[0]=loadedImage;
+					ViewGroup gridChild = (ViewGroup) gridView.getChildAt(0);
+					((ImageView) gridChild.findViewById(R.id.edit_photo)).setImageBitmap(bitmapImages[0]);
+					((ImageView) gridChild.findViewById(R.id.edit_photo)).setBackgroundDrawable(null);
+					spotPostion++;
+				}
+			}
+		});
+		imageLoader.loadImage(urls[1], new SimpleImageLoadingListener() {
+			@Override
+			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+				// Do whatever you want with Bitmap
+				
+				if(bitmapImages!=null)
+				{
+					bitmapImages[1]=loadedImage;
+					ViewGroup gridChild = (ViewGroup) gridView.getChildAt(1);
+					((ImageView) gridChild.findViewById(R.id.edit_photo)).setImageBitmap(bitmapImages[1]);
+					((ImageView) gridChild.findViewById(R.id.edit_photo)).setBackgroundDrawable(null);
+					spotPostion++;
+				}
+			}
+		});
+		imageLoader.loadImage(urls[2], new SimpleImageLoadingListener() {
+			@Override
+			public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+				// Do whatever you want with Bitmap
+				pd.dismiss();
+				if(bitmapImages!=null)
+				{
+					bitmapImages[2]=loadedImage;
+					ViewGroup gridChild = (ViewGroup) gridView.getChildAt(2);
+					((ImageView) gridChild.findViewById(R.id.edit_photo)).setImageBitmap(bitmapImages[2]);
+					((ImageView) gridChild.findViewById(R.id.edit_photo)).setBackgroundDrawable(null);
+					spotPostion++;
+				}
+			}
+		});
+		}
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -169,7 +221,7 @@ public class MainActivity extends Activity {
 		super.onResume();
 	}
 
-
+/*
 	class TheTask extends AsyncTask<Void,Void,Void>
 	{
 
@@ -214,6 +266,7 @@ public class MainActivity extends Activity {
 
 		}   
 	}
+	
 	private Bitmap downloadBitmap(String url) {
 		Bitmap bitmapImage = null;
 		// initilize the default HTTP client object
@@ -262,7 +315,8 @@ public class MainActivity extends Activity {
 
 		return bitmapImage;
 	}
-
+*/
+	
 	public void clearAll(View v){
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
 
