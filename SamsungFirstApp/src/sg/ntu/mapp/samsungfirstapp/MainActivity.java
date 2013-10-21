@@ -43,10 +43,12 @@ import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 @SuppressLint({ "NewApi" }) 
 public class MainActivity extends Activity { 
 	protected static int spotPostion;
+	private String[] urls = new String[3];
 	protected static final int RESULT_LOAD_IMAGE = 131891;
 	protected static final int RESULT_EDIT_IMAGE = 131892;
 	private Context mContext;
 	private GridView gridView;
+	private ProgressDialog pd;
 	private Bitmap[] bitmapImages = new Bitmap[9];
 
 	@Override
@@ -82,43 +84,29 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	OnClickListener editPhotoListener = new OnClickListener() {
-		@Override
-		public void onClick(View v) {
-			Intent in = new Intent(mContext, EditImageActivity.class);
-			Bitmap b;
-			Integer i = (Integer) v.getTag();
-			b = bitmapImages[i];
-			if (b!=null){
-				ByteArrayOutputStream bs = new ByteArrayOutputStream();
-				b.compress(Bitmap.CompressFormat.PNG, 50, bs);
-				in.putExtra("imageData", bs.toByteArray());
-				in.putExtra("imageDataID", i);
-				startActivityForResult(in, RESULT_EDIT_IMAGE);
-			} else {
-				Log.d(this.toString(), "b is null");
-				Toast.makeText(mContext, "No image here.", Toast.LENGTH_SHORT).show();
-			}
-		}
-	};
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		mContext = this;
+		urls[0]=mContext.getResources().getString(R.string.url0);
+		urls[1]=mContext.getResources().getString(R.string.url1);
+		urls[2]=mContext.getResources().getString(R.string.url2);
 		spotPostion = 0;
+		pd = new ProgressDialog(this);
 		
 		setContentView(R.layout.activity_main);
 		
 		gridView = (GridView) findViewById(R.id.gridView);
+		Log.d("zzzf 1",String.valueOf(bitmapImages[0]==null?0:1));
 		ImageAdapter adapter = new ImageAdapter(this, bitmapImages);
+		Log.d("zzzf 2",String.valueOf(bitmapImages[0]==null?0:1));
 		gridView.setAdapter(adapter);
 		gridView.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 				Intent in = new Intent(mContext, EditImageActivity.class);
 				Bitmap b;
 				b = bitmapImages[position];
+				Log.d("zzzf 3",String.valueOf(bitmapImages[0]==null?0:1));
 				if (b!=null){
 					ByteArrayOutputStream bs = new ByteArrayOutputStream();
 					b.compress(Bitmap.CompressFormat.PNG, 50, bs);
@@ -131,6 +119,8 @@ public class MainActivity extends Activity {
 				}
 			}});
 		spotPostion=3;
+		
+        new TheTask().execute();
 	}
 
 	@Override
@@ -193,4 +183,99 @@ public class MainActivity extends Activity {
 		// show it
 		alertDialog.show();
 	}
+	
+	class TheTask extends AsyncTask<Void,Void,Void>
+	{
+
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+			pd.setMessage("Loading..");
+			pd.show();
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			// TODO Auto-generated method stub
+			try
+			{
+				for (int i=0;i<3;i++)
+					bitmapImages[i] = downloadBitmap(urls[i]);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(result);
+			pd.dismiss();
+			if(bitmapImages!=null)
+			{
+				for (int i=0;i<3;i++){
+					ViewGroup gridChild = (ViewGroup) gridView.getChildAt(i);
+					((ImageView) gridChild.findViewById(R.id.edit_photo)).setImageBitmap(bitmapImages[i]);
+					((ImageView) gridChild.findViewById(R.id.edit_photo)).setBackgroundDrawable(null);
+					//spotPostion++; 
+
+				}
+			}
+
+		}   
+	}
+	
+	private Bitmap downloadBitmap(String url) {
+		Bitmap bitmapImage = null;
+		// initilize the default HTTP client object
+		final DefaultHttpClient client = new DefaultHttpClient();
+
+		//forming a HttoGet request 
+		final HttpGet getRequest = new HttpGet(url);
+		try {
+
+			HttpResponse response = client.execute(getRequest);
+
+			//check 200 OK for success
+			final int statusCode = response.getStatusLine().getStatusCode();
+
+			if (statusCode != HttpStatus.SC_OK) {
+				Log.w("ImageDownloader", "Error " + statusCode + 
+						" while retrieving bitmap from " + url);
+				return null;
+
+			}
+
+			final HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				InputStream inputStream = null;
+				try {
+					// getting contents from the stream 
+					inputStream = entity.getContent();
+
+					// decoding stream data back into image Bitmap that android understands
+					bitmapImage = BitmapFactory.decodeStream(inputStream);
+
+
+				} finally {
+					if (inputStream != null) {
+						inputStream.close();
+					}
+					entity.consumeContent();
+				}
+			}
+		} catch (Exception e) {
+			// You Could provide a more explicit error message for IOException
+			getRequest.abort();
+			Log.e("ImageDownloader", "Something went wrong while" +
+					" retrieving bitmap from " + url + e.toString());
+		} 
+
+		return bitmapImage;
+	}
+
 }

@@ -2,7 +2,6 @@ package sg.ntu.mapp.samsungfirstapp;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,8 +31,7 @@ public class ImageAdapter extends BaseAdapter {
  
 	public View getView(int position, View convertView, ViewGroup parent) {
  
-		LayoutInflater inflater = (LayoutInflater) context
-			.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
  
 		View gridView;
  
@@ -46,11 +44,12 @@ public class ImageAdapter extends BaseAdapter {
  
 			// set image
 			ImageView imageView = (ImageView) gridView.findViewById(R.id.edit_photo);
-			imageView.setImageBitmap(imgs[position]);
+			Bitmap b = imgs[position];
+			imageView.setImageBitmap(b);
 			if (position<3){
 				imageLoader.displayImage(urls[position], imageView);
 				imageView.setBackgroundDrawable(null);
-			}
+			} 
  
 		} else {
 			gridView = (View) convertView;
